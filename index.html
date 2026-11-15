@@ -63,6 +63,7 @@ td.it b{font-weight:600}td.it small{display:block;font-size:12px;color:var(--mut
 .r{text-align:right;white-space:nowrap}
 td.r{font-weight:600}td.r small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
 .up{color:var(--ok)}.down{color:var(--bad)}.spend{color:var(--red)}
+.c{font-size:.75em;letter-spacing:0}.card .v .c{font-size:.6em}.inc{color:#248A3D}
 details{margin-top:22px;font-size:12px;color:var(--muted);line-height:1.7}
 summary{cursor:pointer;color:var(--ink);font-size:13.5px;font-weight:500}
 details ul{padding-left:1.2em;margin:6px 0 0}
@@ -94,7 +95,7 @@ details ul{padding-left:1.2em;margin:6px 0 0}
       <div class="ubar" id="ubar"></div>
       <div class="scale"><span id="usedpct"></span><span id="inflowlbl"></span></div>
     </div>
-    <div class="card"><div class="k">RESP withdrawn</div><div class="v" id="inflow"></div><div class="d" id="respsplit"></div></div>
+    <div class="card"><div class="k">RESP withdrawn</div><div class="v inc" id="inflow"></div><div class="d" id="respsplit"></div></div>
     <div class="card"><div class="k">Total spent</div><div class="v spend" id="out"></div><div class="d">Essentials + other</div></div>
     <div class="card"><div class="k">Essentials</div><div class="v spend" id="ess"></div><div class="d">Tuition · housing · living</div></div>
     <div class="card"><div class="k">Other</div><div class="v spend" id="ext"></div><div class="d">Flights · supplies · fees</div></div>
@@ -141,7 +142,7 @@ details ul{padding-left:1.2em;margin:6px 0 0}
 </div>
 
 <script>
-const VERSION = "v2.3";
+const VERSION = "v2.7";
 const DATA_AS_OF = "2026-11-15";
 
 // Transactions: [date, item, note, essentials, other]  — money in is +, money out is −
@@ -170,6 +171,13 @@ const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 const fmtDate = (s) => { const [y, m, d] = s.split("-"); return `${MON[+m - 1]} ${+d}, ${y}`; };
 const fmtShort = (s) => { const [, m, d] = s.split("-"); return `${MON[+m - 1]} ${+d}`; };
 const $ = (id) => document.getElementById(id);
+// Put a money amount into an element with smaller cents: "$1,234" + ".56"
+const putMoney = (node, v, prefix = "") => {
+  const t = prefix + money(v); const i = t.lastIndexOf(".");
+  node.textContent = t.slice(0, i);
+  const c = document.createElement("span"); c.className = "c"; c.textContent = t.slice(i);
+  node.append(c); return node;
+};
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
 
 const cat = (s) => /tuition/i.test(s) ? "Tuition"
@@ -197,26 +205,26 @@ const catList = [...cats].map(([n, a]) => ({n, a, s: out ? a / out * 100 : 0})).
 
 // Header + cards
 $("sub").textContent = `McGill University · BSc Year 1 (2026–27) · Data as of ${fmtDate(DATA_AS_OF)}`;
-$("net").textContent = money(net);
-$("net").style.color = net < 0 ? "#007AFF" : "var(--red)";
-$("inflow").textContent = money(inflow);
+putMoney($("net"), net);
+$("net").style.color = net < 0 ? "#248A3D" : "var(--red)";
+putMoney($("inflow"), inflow);
 $("respsplit").textContent = `EAP ${short(resp.EAP)} · PSE ${short(resp.PSE)}`;
-$("out").textContent = money(out);
-$("ess").textContent = money(ess);
-$("ext").textContent = money(ext);
+putMoney($("out"), out);
+putMoney($("ess"), ess);
+putMoney($("ext"), ext);
 const used = inflow ? out / inflow * 100 : 0;
 // Bar turns blue when the balance goes negative
 const neg = net < 0, base = Math.max(inflow, out) || 1;
-const b1 = el("div"); b1.style.width = (ess / base * 100) + "%"; b1.style.background = neg ? "#007AFF" : "var(--tint)";
-const b2 = el("div"); b2.style.width = (ext / base * 100) + "%"; b2.style.background = neg ? "#8EC1FF" : "var(--soft)";
+const b1 = el("div"); b1.style.width = (ess / base * 100) + "%"; b1.style.background = neg ? "#248A3D" : "var(--tint)";
+const b2 = el("div"); b2.style.width = (ext / base * 100) + "%"; b2.style.background = neg ? "#8FD19E" : "var(--soft)";
 $("ubar").append(b1, b2);
 $("usedpct").textContent = `${used.toFixed(1)}% of withdrawals spent`;
 $("inflowlbl").textContent = short(inflow);
 
 // Summary
 const sm = $("summary");
-sm.append("Yumi has drawn ", el("b", null, money(inflow)), " from the RESP and spent ",
-  el("b", null, money(out)), " so far, leaving ", el("b", null, money(net)), ". The biggest cost is ",
+sm.append("Yumi has drawn ", putMoney(el("b"), inflow), " from the RESP and spent ",
+  putMoney(el("b"), out), " so far, leaving ", putMoney(el("b"), net), ". The biggest cost is ",
   el("b", null, catList[0].n.toLowerCase()), " at ", el("b", null, catList[0].s.toFixed(0) + "%"), " of all spending.");
 
 // Categories
@@ -224,7 +232,7 @@ const max = catList.length ? catList[0].a : 1;
 for (const c of catList) {
   const r = el("div", "crow");
   const trk = el("div", "trk"); const f = el("div"); f.style.width = (c.a / max * 100) + "%"; trk.append(f);
-  const amt = el("div", "amt", money(c.a)); amt.append(el("small", null, c.s.toFixed(1) + "%"));
+  const amt = putMoney(el("div", "amt"), c.a); amt.append(el("small", null, c.s.toFixed(1) + "%"));
   r.append(el("div", null, c.n), trk, amt);
   $("cats").append(r);
 }
@@ -267,7 +275,7 @@ if (months.length) show(months[months.length - 1], cols[cols.length - 1]);
   const kind = v > 0 ? "RESP" : cat(d.desc);
   it.append(el("small", null, kind + (d.note ? " · " + d.note : "")));
   tr.append(it);
-  const a = el("td", "r" + (v > 0 ? " up" : " spend"), (v > 0 ? "+" : "") + money(v));
+  const a = putMoney(el("td", "r" + (v > 0 ? " inc" : " spend")), v, v > 0 ? "+" : "");
   a.append(el("small", null, v > 0 ? "Deposit" : (d.ess != null ? "Essential" : "Other")));
   tr.append(a);
   $("txs").append(tr);
