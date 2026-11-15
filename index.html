@@ -41,7 +41,7 @@ h1{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:34px;font-w
 .crow:last-child{border-bottom:0}
 .crow .trk{height:8px;border-radius:4px;background:#F2F2F7;overflow:hidden}
 .crow .trk div{height:100%;border-radius:4px;background:var(--tint)}
-.crow .amt{text-align:right;font-weight:600;white-space:nowrap}
+.crow .amt{text-align:right;font-weight:600;white-space:nowrap;color:var(--red)}
 .crow .amt small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
 .dcal{display:flex;gap:6px;align-items:flex-end;height:150px;margin-top:6px}
 .dcal .m{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer}
@@ -62,7 +62,7 @@ td.dt{white-space:nowrap;color:var(--muted);font-size:12.5px}
 td.it b{font-weight:600}td.it small{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
 .r{text-align:right;white-space:nowrap}
 td.r{font-weight:600}td.r small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
-.up{color:var(--ok)}.down{color:var(--bad)}
+.up{color:var(--ok)}.down{color:var(--bad)}.spend{color:var(--red)}
 details{margin-top:22px;font-size:12px;color:var(--muted);line-height:1.7}
 summary{cursor:pointer;color:var(--ink);font-size:13.5px;font-weight:500}
 details ul{padding-left:1.2em;margin:6px 0 0}
@@ -95,9 +95,9 @@ details ul{padding-left:1.2em;margin:6px 0 0}
       <div class="scale"><span id="usedpct"></span><span id="inflowlbl"></span></div>
     </div>
     <div class="card"><div class="k">RESP withdrawn</div><div class="v" id="inflow"></div><div class="d" id="respsplit"></div></div>
-    <div class="card"><div class="k">Total spent</div><div class="v" id="out"></div><div class="d">Essentials + other</div></div>
-    <div class="card"><div class="k">Essentials</div><div class="v" id="ess"></div><div class="d">Tuition · housing · living</div></div>
-    <div class="card"><div class="k">Other</div><div class="v" id="ext"></div><div class="d">Flights · supplies · fees</div></div>
+    <div class="card"><div class="k">Total spent</div><div class="v spend" id="out"></div><div class="d">Essentials + other</div></div>
+    <div class="card"><div class="k">Essentials</div><div class="v spend" id="ess"></div><div class="d">Tuition · housing · living</div></div>
+    <div class="card"><div class="k">Other</div><div class="v spend" id="ext"></div><div class="d">Flights · supplies · fees</div></div>
   </div>
 
   <p class="notes" id="summary"></p>
@@ -141,7 +141,7 @@ details ul{padding-left:1.2em;margin:6px 0 0}
 </div>
 
 <script>
-const VERSION = "v2.2";
+const VERSION = "v2.3";
 const DATA_AS_OF = "2026-11-15";
 
 // Transactions: [date, item, note, essentials, other]  — money in is +, money out is −
@@ -205,8 +205,10 @@ $("out").textContent = money(out);
 $("ess").textContent = money(ess);
 $("ext").textContent = money(ext);
 const used = inflow ? out / inflow * 100 : 0;
-const b1 = el("div"); b1.style.width = (inflow ? Math.min(100, ess / inflow * 100) : 0) + "%"; b1.style.background = "var(--tint)";
-const b2 = el("div"); b2.style.width = (inflow ? Math.min(100, ext / inflow * 100) : 0) + "%"; b2.style.background = "var(--soft)";
+// Bar turns blue when the balance goes negative
+const neg = net < 0, base = Math.max(inflow, out) || 1;
+const b1 = el("div"); b1.style.width = (ess / base * 100) + "%"; b1.style.background = neg ? "#007AFF" : "var(--tint)";
+const b2 = el("div"); b2.style.width = (ext / base * 100) + "%"; b2.style.background = neg ? "#8EC1FF" : "var(--soft)";
 $("ubar").append(b1, b2);
 $("usedpct").textContent = `${used.toFixed(1)}% of withdrawals spent`;
 $("inflowlbl").textContent = short(inflow);
@@ -265,7 +267,7 @@ if (months.length) show(months[months.length - 1], cols[cols.length - 1]);
   const kind = v > 0 ? "RESP" : cat(d.desc);
   it.append(el("small", null, kind + (d.note ? " · " + d.note : "")));
   tr.append(it);
-  const a = el("td", "r" + (v > 0 ? " up" : ""), (v > 0 ? "+" : "") + money(v));
+  const a = el("td", "r" + (v > 0 ? " up" : " spend"), (v > 0 ? "+" : "") + money(v));
   a.append(el("small", null, v > 0 ? "Deposit" : (d.ess != null ? "Essential" : "Other")));
   tr.append(a);
   $("txs").append(tr);
