@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="McGill">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F2F2F7">
+<meta name="robots" content="noindex, nofollow">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>Yumi's McGill Expenses</title>
+<style>
+/* McGill Expenses — EP Simulator style (Apple) */
+:root{--tint:#007AFF;--ink:#1C1C1E;--bg:#F2F2F7;--card:#fff;--line:#E5E5EA;--muted:#6E6E73;--ok:#248A3D;--bad:#E0362C;--sep:rgba(60,60,67,.12);--soft:#C7C7CC;--red:#ED1B2F}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Helvetica Neue",sans-serif;font-size:14px;font-feature-settings:"tnum" 1;-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+.wrap{max-width:1000px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 22px) 20px 60px}
+.titlebar{display:flex;align-items:center;gap:12px}
+.titlebar img{width:48px;height:48px;border-radius:11px;flex:none}
+h1{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;font-size:34px;font-weight:700;letter-spacing:-.025em;line-height:1.1;margin:0}
+.sub{font-size:13px;color:var(--muted);margin:10px 0 18px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.card{background:var(--card);border-radius:16px;padding:14px 16px;min-width:0}
+.card .k{font-size:13px;font-weight:500;color:var(--muted)}
+.card .v{font-size:26px;font-weight:700;letter-spacing:-.025em;margin-top:3px}
+.card .d{font-size:12.5px;color:var(--muted);margin-top:2px}
+.big{grid-column:span 2}.big .v{font-size:34px}
+.ubar{display:flex;height:10px;border-radius:5px;background:#E5E5EA;overflow:hidden;margin-top:10px}
+.ubar div{height:100%}
+.scale{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px}
+.notes{font-size:13.5px;line-height:1.7;padding:14px 16px;background:#fff;border-radius:16px;margin:0 0 4px}
+.notes b{font-weight:600}
+.sec h3{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;font-size:22px;font-weight:700;letter-spacing:-.02em;margin:34px 0 10px}
+.rpanel{background:#fff;border-radius:16px;padding:16px 18px}
+.rsub{font-size:11.5px;color:var(--muted);margin:0 0 10px;line-height:1.5}
+.crow{display:grid;grid-template-columns:110px 1fr 92px;gap:10px;align-items:center;padding:7px 0;border-bottom:.5px solid var(--sep);font-size:13.5px}
+.crow:last-child{border-bottom:0}
+.crow .trk{height:8px;border-radius:4px;background:#F2F2F7;overflow:hidden}
+.crow .trk div{height:100%;border-radius:4px;background:var(--tint)}
+.crow .amt{text-align:right;font-weight:600;white-space:nowrap}
+.crow .amt small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
+.dcal{display:flex;gap:6px;align-items:flex-end;height:150px;margin-top:6px}
+.dcal .m{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer}
+.dcal .stk{width:100%;max-width:38px;display:flex;flex-direction:column-reverse;border-radius:5px 5px 2px 2px;overflow:hidden}
+.dcal .a{font-size:9.5px;color:#3A3A3C;margin-bottom:2px;white-space:nowrap}
+.dcal .l{font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap}
+.dcal .m.sel .l{color:var(--ink);font-weight:600}
+.legend{font-size:11px;color:var(--muted);margin:10px 0 0}.legend i{display:inline-block;width:10px;height:7px;border-radius:3px;margin:0 4px 0 10px;vertical-align:middle}.legend i:first-child{margin-left:0}
+.ctake{font-size:12.5px;line-height:1.55;margin-top:10px;padding:8px 10px;background:#F2F2F7;border-radius:12px;min-height:20px}
+table{width:100%;background:#fff;border-radius:16px;border-collapse:separate;border-spacing:0;padding:8px}
+th{background:#E8F1FF;color:#0062CC;font-weight:600;font-size:11.5px;text-align:left;padding:8px 10px;white-space:nowrap}
+th:first-child{border-radius:999px 0 0 999px;padding-left:14px}
+th:last-child{border-radius:0 999px 999px 0;padding-right:14px}
+td{border-top:.5px solid var(--sep);padding:10px 10px;vertical-align:top;font-size:13.5px}
+tbody tr:first-child td{border-top:0}
+td:first-child{padding-left:14px}td:last-child{padding-right:14px}
+td.dt{white-space:nowrap;color:var(--muted);font-size:12.5px}
+td.it b{font-weight:600}td.it small{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
+.r{text-align:right;white-space:nowrap}
+td.r{font-weight:600}td.r small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
+.up{color:var(--ok)}.down{color:var(--bad)}
+details{margin-top:22px;font-size:12px;color:var(--muted);line-height:1.7}
+summary{cursor:pointer;color:var(--ink);font-size:13.5px;font-weight:500}
+details ul{padding-left:1.2em;margin:6px 0 0}
+.foot{font-size:12px;color:#8E8E93;line-height:1.7;margin-top:16px;text-align:center}
+@media(max-width:640px){
+  .wrap{padding-left:16px;padding-right:16px}
+  h1{font-size:30px}
+  .cards{grid-template-columns:1fr 1fr;gap:10px}
+  .card{padding:12px 14px}.card .v{font-size:22px}.big .v{font-size:30px}
+  .rpanel{padding:14px 15px}
+  .crow{grid-template-columns:96px 1fr 84px}
+  td{padding:9px 7px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="titlebar">
+    <img src="icon-180.png" alt="McGill">
+    <h1>Yumi's McGill Expenses</h1>
+  </div>
+  <div class="sub" id="sub"></div>
+
+  <div class="cards">
+    <div class="card big">
+      <div class="k">Remaining balance</div>
+      <div class="v" id="net"></div>
+      <div class="d">RESP withdrawals − total spent</div>
+      <div class="ubar" id="ubar"></div>
+      <div class="scale"><span id="usedpct"></span><span id="inflowlbl"></span></div>
+    </div>
+    <div class="card"><div class="k">RESP withdrawn</div><div class="v" id="inflow"></div><div class="d" id="respsplit"></div></div>
+    <div class="card"><div class="k">Total spent</div><div class="v" id="out"></div><div class="d">Essentials + other</div></div>
+    <div class="card"><div class="k">Essentials</div><div class="v" id="ess"></div><div class="d">Tuition · housing · living</div></div>
+    <div class="card"><div class="k">Other</div><div class="v" id="ext"></div><div class="d">Flights · supplies · fees</div></div>
+  </div>
+
+  <p class="notes" id="summary"></p>
+
+  <div class="sec">
+    <h3>Spending by category</h3>
+    <div class="rpanel">
+      <p class="rsub">“Living allowance” is money sent to Yumi's TD account; what she spent it on isn't tracked here.</p>
+      <div id="cats"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>Monthly spending</h3>
+    <div class="rpanel">
+      <p class="rsub">Money out only (RESP deposits excluded). Tap a bar for details.</p>
+      <div class="dcal" id="months"></div>
+      <div class="legend"><i style="background:var(--tint)"></i>Essentials<i style="background:var(--soft)"></i>Other</div>
+      <div class="ctake" id="mdetail"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>All transactions</h3>
+    <table>
+      <thead><tr><th>Date</th><th>Item</th><th class="r">Amount</th></tr></thead>
+      <tbody id="txs"></tbody>
+    </table>
+  </div>
+
+  <details>
+    <summary>How it's calculated</summary>
+    <ul>
+      <li>Essentials = the sheet's Essentials column; Other = the column next to it. Positive amounts are RESP withdrawals.</li>
+      <li>EAP (Educational Assistance Payment) is the grant + growth portion, taxable to Yumi. PSE (Post-Secondary Education) is a return of contributions, tax-free.</li>
+      <li>Categories: Tuition → Tuition · Residences / Royal Victoria College → Housing · Living Expense → Living allowance · Air Canada / Trip.com → Flights · Ikea → Dorm supplies · SUSMcGill → Student fees.</li>
+    </ul>
+  </details>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+const VERSION = "v2.0";
+const DATA_AS_OF = "2026-11-15";
+
+// Transactions: [date, item, note, essentials, other]  — money in is +, money out is −
+const TX = [
+  ["2026-05-10", "McGill Tuition Deposit", "", -500.00, null],
+  ["2026-06-02", "McGill Residences Deposit", "", -1530.00, null],
+  ["2026-06-09", "Trip.com", "Air Canada (AC316)", null, -414.40],
+  ["2026-07-20", "EAP $8,000", "Withdrawal from RESP account", 8000.00, null],
+  ["2026-07-20", "1st Year Living Expense", "From TD RESP to Yumi's TD account", -5000.00, null],
+  ["2026-07-31", "SUSMcGill * Science Und", "", null, -160.00],
+  ["2026-08-07", "McGill Tuition", "Test payment for paying tuition online", -9.99, null],
+  ["2026-08-21", "McGill Tuition", "Fall 2026 tuition paid online", -7059.49, null],
+  ["2026-08-21", "PSE $8,000 (1st)", "Withdrawal from RESP account", 8000.00, null],
+  ["2026-08-24", "Ikea Montreal", "Yumi's dorm supplies", null, -550.95],
+  ["2026-08-24", "PSE $8,000 (2nd)", "Withdrawal from RESP account", 8000.00, null],
+  ["2026-09-07", "Royal Victoria College Rent", "Rent and other fees", -4312.73, null],
+  ["2026-10-10", "Air Canada", "Flight booking", null, -971.96],
+  ["2026-10-11", "Royal Victoria College Rent", "Rent and other fees", -1611.06, null],
+  ["2026-11-02", "Royal Victoria College Rent", "Rent and other fees", -1610.00, null],
+];
+
+const rows = TX.map(([date, desc, note, ess, ext]) => ({date, desc, note, ess, ext}));
+const money = (v) => (v < 0 ? "-" : "") + "$" + Math.abs(v).toLocaleString("en-CA", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const short = (v) => "$" + (Math.abs(v) >= 1000 ? (v / 1000).toLocaleString("en-CA", {maximumFractionDigits: 1}) + "K" : Math.round(v).toLocaleString("en-CA"));
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const fmtDate = (s) => { const [y, m, d] = s.split("-"); return `${MON[+m - 1]} ${+d}, ${y}`; };
+const fmtShort = (s) => { const [, m, d] = s.split("-"); return `${MON[+m - 1]} ${+d}`; };
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+
+const cat = (s) => /tuition/i.test(s) ? "Tuition"
+  : /residence|royal victoria/i.test(s) ? "Housing"
+  : /living expense/i.test(s) ? "Living allowance"
+  : /air canada|trip\.com/i.test(s) ? "Flights"
+  : /ikea/i.test(s) ? "Dorm supplies"
+  : /susmcgill|science und/i.test(s) ? "Student fees"
+  : "Other";
+
+// Totals
+let inflow = 0, ess = 0, ext = 0; const resp = {EAP: 0, PSE: 0};
+for (const d of rows) {
+  for (const [v, k] of [[d.ess, "e"], [d.ext, "x"]]) {
+    if (v == null) continue;
+    if (v > 0) { inflow += v; const m = /^\s*(EAP|PSE)/i.exec(d.desc); if (m) resp[m[1].toUpperCase()] += v; }
+    else if (k === "e") ess -= v; else ext -= v;
+  }
+}
+const out = ess + ext, net = inflow - out;
+
+const cats = new Map();
+for (const d of rows) for (const v of [d.ess, d.ext]) if (v < 0) cats.set(cat(d.desc), (cats.get(cat(d.desc)) || 0) - v);
+const catList = [...cats].map(([n, a]) => ({n, a, s: out ? a / out * 100 : 0})).sort((a, b) => b.a - a.a);
+
+// Header + cards
+$("sub").textContent = `McGill University · BSc Year 1 (2026–27) · Data as of ${fmtDate(DATA_AS_OF)}`;
+$("net").textContent = money(net);
+$("net").classList.add(net < 0 ? "down" : "up");
+$("inflow").textContent = money(inflow);
+$("respsplit").textContent = `EAP ${short(resp.EAP)} · PSE ${short(resp.PSE)}`;
+$("out").textContent = money(out);
+$("ess").textContent = money(ess);
+$("ext").textContent = money(ext);
+const used = inflow ? out / inflow * 100 : 0;
+const b1 = el("div"); b1.style.width = (inflow ? Math.min(100, ess / inflow * 100) : 0) + "%"; b1.style.background = "var(--tint)";
+const b2 = el("div"); b2.style.width = (inflow ? Math.min(100, ext / inflow * 100) : 0) + "%"; b2.style.background = "var(--soft)";
+$("ubar").append(b1, b2);
+$("usedpct").textContent = `${used.toFixed(1)}% of withdrawals spent`;
+$("inflowlbl").textContent = short(inflow);
+
+// Summary
+const sm = $("summary");
+sm.append("Yumi has drawn ", el("b", null, money(inflow)), " from the RESP and spent ",
+  el("b", null, money(out)), " so far, leaving ", el("b", null, money(net)), ". The biggest cost is ",
+  el("b", null, catList[0].n.toLowerCase()), " at ", el("b", null, catList[0].s.toFixed(0) + "%"), " of all spending.");
+
+// Categories
+const max = catList.length ? catList[0].a : 1;
+for (const c of catList) {
+  const r = el("div", "crow");
+  const trk = el("div", "trk"); const f = el("div"); f.style.width = (c.a / max * 100) + "%"; trk.append(f);
+  const amt = el("div", "amt", money(c.a)); amt.append(el("small", null, c.s.toFixed(1) + "%"));
+  r.append(el("div", null, c.n), trk, amt);
+  $("cats").append(r);
+}
+
+// Monthly
+const mm = new Map();
+for (const d of rows) {
+  const k = d.date.slice(0, 7); const o = mm.get(k) || {k, e: 0, x: 0};
+  if (d.ess < 0) o.e -= d.ess; if (d.ext < 0) o.x -= d.ext; mm.set(k, o);
+}
+const months = [...mm.values()].filter(o => o.e || o.x).sort((a, b) => a.k < b.k ? -1 : 1);
+const mmax = Math.max(...months.map(o => o.e + o.x), 1);
+const show = (o, col) => {
+  document.querySelectorAll(".dcal .m").forEach(c => c.classList.remove("sel"));
+  col.classList.add("sel");
+  const [y, m] = o.k.split("-");
+  $("mdetail").textContent = `${MON[+m - 1]} ${y} · Essentials ${money(o.e)} · Other ${money(o.x)} · Total ${money(o.e + o.x)}`;
+};
+const cols = [];
+months.forEach((o, i) => {
+  const col = el("div", "m"); const tot = o.e + o.x;
+  col.append(el("div", "a", short(tot)));
+  const st = el("div", "stk"); st.style.height = (tot / mmax * 112) + "px";
+  const se = el("div"); se.style.height = (o.e / tot * 100) + "%"; se.style.background = "var(--tint)";
+  const sx = el("div"); sx.style.height = (o.x / tot * 100) + "%"; sx.style.background = "var(--soft)";
+  st.append(se, sx); col.append(st);
+  const [y, m] = o.k.split("-");
+  col.append(el("div", "l", (i === 0 || m === "01") ? `${MON[+m - 1]} ’${y.slice(2)}` : MON[+m - 1]));
+  col.addEventListener("click", () => show(o, col));
+  $("months").append(col); cols.push(col);
+});
+if (months.length) show(months[months.length - 1], cols[cols.length - 1]);
+
+// Transactions (newest first)
+[...rows].reverse().forEach((d) => {
+  const v = d.ess != null ? d.ess : d.ext;
+  const tr = el("tr");
+  tr.append(el("td", "dt", fmtShort(d.date)));
+  const it = el("td", "it"); it.append(el("b", null, d.desc));
+  const kind = v > 0 ? "RESP" : cat(d.desc);
+  it.append(el("small", null, kind + (d.note ? " · " + d.note : "")));
+  tr.append(it);
+  const a = el("td", "r" + (v > 0 ? " up" : ""), (v > 0 ? "+" : "") + money(v));
+  a.append(el("small", null, v > 0 ? "Deposit" : (d.ess != null ? "Essential" : "Other")));
+  tr.append(a);
+  $("txs").append(tr);
+});
+
+$("foot").textContent = `McGill Expenses ${VERSION} · ${DATA_AS_OF}`;
+</script>
+</body>
+</html>
