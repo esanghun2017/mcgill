@@ -77,9 +77,19 @@ details ul{padding-left:1.2em;margin:6px 0 0}
   .crow{grid-template-columns:96px 1fr 84px}
   td{padding:9px 7px}
 }
+
+/* Falling leaves (pull down at the top) */
+#leaves{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+.leaf{position:absolute;top:-80px;will-change:transform;user-select:none;perspective:260px}
+.leaf span{display:block;line-height:1;animation:sway var(--sw) ease-in-out infinite alternate}
+@keyframes fall{to{transform:translate3d(var(--dx),calc(100vh + 120px),0) rotate(var(--rot))}}
+@keyframes sway{0%{transform:translateX(-22px) rotate(-20deg) rotateY(-58deg) rotateX(22deg)}50%{transform:translateX(0) rotate(0deg) rotateY(0deg) rotateX(-18deg)}100%{transform:translateX(22px) rotate(20deg) rotateY(58deg) rotateX(22deg)}}
+#pullhint{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 6px);transform:translate(-50%,-50px);font-size:22px;opacity:0;transition:opacity .15s;pointer-events:none;z-index:51}
 </style>
 </head>
 <body>
+<div id="leaves"></div>
+<div id="pullhint">🍁</div>
 <div class="wrap">
   <div class="titlebar">
     <img src="icon-180.png" alt="McGill">
@@ -142,7 +152,7 @@ details ul{padding-left:1.2em;margin:6px 0 0}
 </div>
 
 <script>
-const VERSION = "v2.7";
+const VERSION = "v2.14";
 const DATA_AS_OF = "2026-11-15";
 
 // Transactions: [date, item, note, essentials, other]  — money in is +, money out is −
@@ -282,6 +292,56 @@ if (months.length) show(months[months.length - 1], cols[cols.length - 1]);
 });
 
 $("foot").textContent = `McGill Expenses ${VERSION} · ${DATA_AS_OF}`;
+
+// Fun: pull down at the top of the page and leaves fall
+(() => {
+  const box = $("leaves"), hint = $("pullhint");
+  const LEAF = "🍁";
+  let busy = false;
+  const drop = () => {
+    if (busy) return; busy = true;
+    const n = window.innerWidth < 600 ? 28 : 40;
+    for (let i = 0; i < n; i++) {
+      const w = el("div", "leaf"); const inner = el("span", null, LEAF);
+      const dur0 = 3.5 + Math.random() * 3, delay = Math.random() * 1.6;
+      w.style.left = (Math.random() * 100) + "vw";
+      // Depth: near leaves are big, sharp and fast; far leaves small, soft and slow
+      const depth = Math.random();
+      w.style.fontSize = (24 + depth * 40) + "px";
+      w.style.filter = `blur(${((1 - depth) * 1.6).toFixed(1)}px) drop-shadow(${(1 + depth * 3).toFixed(1)}px ${(2 + depth * 6).toFixed(1)}px ${(2 + depth * 4).toFixed(1)}px rgba(0,0,0,${(0.12 + depth * 0.18).toFixed(2)}))`;
+      w.style.opacity = (0.75 + depth * 0.25).toFixed(2);
+      w.style.zIndex = Math.round(depth * 10);
+      const dur = dur0 * (1.25 - depth * 0.45);
+      w.style.setProperty("--dx", ((Math.random() - 0.5) * 160) + "px");
+      w.style.setProperty("--rot", ((Math.random() - 0.5) * 720) + "deg");
+      w.style.animation = `fall ${dur}s linear ${delay}s forwards`;
+      inner.style.setProperty("--sw", (0.8 + Math.random() * 1.2) + "s");
+      w.append(inner); box.append(w);
+      setTimeout(() => w.remove(), (dur + delay) * 1000 + 200);
+    }
+    setTimeout(() => { busy = false; }, 1500);
+  };
+  let startY = null, pulled = 0;
+  window.addEventListener("touchstart", (e) => { startY = window.scrollY <= 0 ? e.touches[0].clientY : null; pulled = 0; }, {passive: true});
+  window.addEventListener("touchmove", (e) => {
+    if (startY == null) return;
+    pulled = e.touches[0].clientY - startY;
+    const p = Math.max(0, Math.min(1, pulled / 90));
+    hint.style.opacity = p; hint.style.transform = `translate(-50%, ${-50 + p * 60}px) rotate(${p * 180}deg)`;
+  }, {passive: true});
+  window.addEventListener("touchend", () => {
+    if (startY != null && pulled > 90) drop();
+    startY = null; pulled = 0; hint.style.opacity = 0; hint.style.transform = "translate(-50%,-50px)";
+  }, {passive: true});
+  // On a computer: scroll up hard while already at the top
+  let wheelUp = 0, wt;
+  window.addEventListener("wheel", (e) => {
+    if (window.scrollY > 0 || e.deltaY >= 0) { wheelUp = 0; return; }
+    wheelUp += -e.deltaY; clearTimeout(wt); wt = setTimeout(() => { wheelUp = 0; }, 300);
+    if (wheelUp > 400) { wheelUp = 0; drop(); }
+  }, {passive: true});
+  window.dropLeaves = drop;
+})();
 </script>
 </body>
 </html>
