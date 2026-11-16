@@ -78,15 +78,15 @@ details ul{padding-left:1.2em;margin:6px 0 0}
   td{padding:9px 7px}
 }
 
-/* Matrix rain (pull down at the top) */
+/* Bouncing bears (pull down at the top) */
 #leaves{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
-#matrix{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:60}
+.bear{position:absolute;left:0;top:0;will-change:transform;user-select:none;-webkit-user-drag:none;transform-origin:50% 100%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.18))}
 #pullhint{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 6px);transform:translate(-50%,-50px);font-size:22px;opacity:0;transition:opacity .15s;pointer-events:none;z-index:51}
 </style>
 </head>
 <body>
 <div id="leaves"></div>
-<div id="pullhint" style="font-family:Menlo,monospace;color:#00FF41;background:#000;border-radius:50%;width:30px;height:30px;line-height:30px;text-align:center;font-size:16px">ｱ</div>
+<div id="pullhint"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGcgc3Ryb2tlPSIjM0IyRjJDIiBzdHJva2Utd2lkdGg9IjIuNCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48Y2lyY2xlIGN4PSIyNSIgY3k9IjI1IiByPSIxMiIgZmlsbD0iI0ZGRkZGRiIvPjxjaXJjbGUgY3g9Ijc1IiBjeT0iMjUiIHI9IjEyIiBmaWxsPSIjRkZGRkZGIi8+PGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iNiIgZmlsbD0iI0Y4QzNDQSIgc3Ryb2tlPSJub25lIi8+PGNpcmNsZSBjeD0iNzUiIGN5PSIyNSIgcj0iNiIgZmlsbD0iI0Y4QzNDQSIgc3Ryb2tlPSJub25lIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNTIiIHJ4PSIzOSIgcnk9IjM1IiBmaWxsPSIjRkZGRkZGIi8+PHBhdGggZD0iTTcwIDc4IEw4MCA5NiBMODggOTIgTDgwIDc2IFoiIGZpbGw9IiNDODEwMkUiLz48cGF0aCBkPSJNMTQgNzAgUTUwIDg2IDg2IDcwIEw4NCA4MCBRNTAgOTggMTYgODAgWiIgZmlsbD0iI0VEMUIyRiIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9IjYwIiByeD0iMTIiIHJ5PSI4LjUiIGZpbGw9IiNGRkY0RUMiLz48L2c+PGVsbGlwc2UgY3g9IjM3IiBjeT0iNDkiIHJ4PSIzLjQiIHJ5PSI0LjMiIGZpbGw9IiMyQTIxMUYiLz48ZWxsaXBzZSBjeD0iNjMiIGN5PSI0OSIgcng9IjMuNCIgcnk9IjQuMyIgZmlsbD0iIzJBMjExRiIvPjxjaXJjbGUgY3g9IjM4LjMiIGN5PSI0Ny40IiByPSIxLjIiIGZpbGw9IiNGRkZGRkYiLz48Y2lyY2xlIGN4PSI2NC4zIiBjeT0iNDcuNCIgcj0iMS4yIiBmaWxsPSIjRkZGRkZGIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNTYuNSIgcng9IjQuMiIgcnk9IjMiIGZpbGw9IiMyQTIxMUYiLz48cGF0aCBkPSJNNDUuNSA2MiBRNDggNjQuNSA1MCA2MiBRNTIgNjQuNSA1NC41IDYyIiBmaWxsPSJub25lIiBzdHJva2U9IiMyQTIxMUYiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48ZWxsaXBzZSBjeD0iMjciIGN5PSI2MCIgcng9IjYiIHJ5PSIzLjUiIGZpbGw9IiNGOUFGQkEiIG9wYWNpdHk9Ii44NSIvPjxlbGxpcHNlIGN4PSI3MyIgY3k9IjYwIiByeD0iNiIgcnk9IjMuNSIgZmlsbD0iI0Y5QUZCQSIgb3BhY2l0eT0iLjg1Ii8+PC9zdmc+" width="30" height="30" alt=""></div>
 <div class="wrap">
   <div class="titlebar">
     <img src="icon-180.png" alt="McGill">
@@ -149,7 +149,7 @@ details ul{padding-left:1.2em;margin:6px 0 0}
 </div>
 
 <script>
-const VERSION = "v3.3";
+const VERSION = "v3.7";
 const DATA_AS_OF = "2026-11-15";
 
 // Transactions: [date, item, note, essentials, other]  — money in is +, money out is −
@@ -290,62 +290,97 @@ if (months.length) show(months[months.length - 1], cols[cols.length - 1]);
 
 $("foot").textContent = `McGill Expenses ${VERSION} · ${DATA_AS_OF}`;
 
-// Fun: pull down at the top of the page for a Matrix-style green wave
+// Fun: pull down at the top of the page and bears drop in and bounce
 (() => {
   const box = $("leaves"), hint = $("pullhint");
-  // Matrix: the screen slowly fades to green code rain from the top down,
-  // holds for a moment, then slowly fades back to the page.
-  const GLYPHS = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789$McGILL";
-  let busy = false;
-  const ease = (x) => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x);
+  // Bears: little white bears in McGill red scarves drop in, bounce on the floor
+  // (squashing a little when they land), wobble side to side and bump into each other.
+  const BEAR = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PGcgc3Ryb2tlPSIjM0IyRjJDIiBzdHJva2Utd2lkdGg9IjIuNCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48Y2lyY2xlIGN4PSIyNSIgY3k9IjI1IiByPSIxMiIgZmlsbD0iI0ZGRkZGRiIvPjxjaXJjbGUgY3g9Ijc1IiBjeT0iMjUiIHI9IjEyIiBmaWxsPSIjRkZGRkZGIi8+PGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iNiIgZmlsbD0iI0Y4QzNDQSIgc3Ryb2tlPSJub25lIi8+PGNpcmNsZSBjeD0iNzUiIGN5PSIyNSIgcj0iNiIgZmlsbD0iI0Y4QzNDQSIgc3Ryb2tlPSJub25lIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNTIiIHJ4PSIzOSIgcnk9IjM1IiBmaWxsPSIjRkZGRkZGIi8+PHBhdGggZD0iTTcwIDc4IEw4MCA5NiBMODggOTIgTDgwIDc2IFoiIGZpbGw9IiNDODEwMkUiLz48cGF0aCBkPSJNMTQgNzAgUTUwIDg2IDg2IDcwIEw4NCA4MCBRNTAgOTggMTYgODAgWiIgZmlsbD0iI0VEMUIyRiIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9IjYwIiByeD0iMTIiIHJ5PSI4LjUiIGZpbGw9IiNGRkY0RUMiLz48L2c+PGVsbGlwc2UgY3g9IjM3IiBjeT0iNDkiIHJ4PSIzLjQiIHJ5PSI0LjMiIGZpbGw9IiMyQTIxMUYiLz48ZWxsaXBzZSBjeD0iNjMiIGN5PSI0OSIgcng9IjMuNCIgcnk9IjQuMyIgZmlsbD0iIzJBMjExRiIvPjxjaXJjbGUgY3g9IjM4LjMiIGN5PSI0Ny40IiByPSIxLjIiIGZpbGw9IiNGRkZGRkYiLz48Y2lyY2xlIGN4PSI2NC4zIiBjeT0iNDcuNCIgcj0iMS4yIiBmaWxsPSIjRkZGRkZGIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNTYuNSIgcng9IjQuMiIgcnk9IjMiIGZpbGw9IiMyQTIxMUYiLz48cGF0aCBkPSJNNDUuNSA2MiBRNDggNjQuNSA1MCA2MiBRNTIgNjQuNSA1NC41IDYyIiBmaWxsPSJub25lIiBzdHJva2U9IiMyQTIxMUYiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48ZWxsaXBzZSBjeD0iMjciIGN5PSI2MCIgcng9IjYiIHJ5PSIzLjUiIGZpbGw9IiNGOUFGQkEiIG9wYWNpdHk9Ii44NSIvPjxlbGxpcHNlIGN4PSI3MyIgY3k9IjYwIiByeD0iNiIgcnk9IjMuNSIgZmlsbD0iI0Y5QUZCQSIgb3BhY2l0eT0iLjg1Ii8+PC9zdmc+";
+  const bears = []; let raf = 0, last = 0, busy = false;
+  const G = 1250;                                   // gravity on screen, px/s² — gentler than real for a floaty feel
+  // Gravity follows the phone's tilt once motion is allowed; shaking the phone jolts the bears.
+  const grav = {x: 0, y: G}; let motionOn = false, motionAsked = false;
+  const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const NEEDS_ASK = typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function";
+  const onMotion = (e) => {
+    const a = e.accelerationIncludingGravity; if (!a || a.x == null) return;
+    let x = a.x, y = a.y; if (!IOS) { x = -x; y = -y; }   // iPhone reports the opposite sign of Android
+    const sx = x, sy = -y;                                 // device axes → screen axes (y down)
+    const ang = ((screen.orientation && screen.orientation.angle) || window.orientation || 0) * Math.PI / 180;
+    const rx = sx * Math.cos(ang) + sy * Math.sin(ang), ry = -sx * Math.sin(ang) + sy * Math.cos(ang);
+    grav.x = rx * (G / 9.8); grav.y = ry * (G / 9.8);
+    motionOn = true;
+    if (bears.length && !raf) raf = requestAnimationFrame(step);
+  };
+  const askMotion = () => {
+    if (motionAsked || typeof DeviceMotionEvent === "undefined") return; motionAsked = true;
+    if (NEEDS_ASK) DeviceMotionEvent.requestPermission().then((r) => { if (r === "granted") window.addEventListener("devicemotion", onMotion); }).catch(() => {});
+    else window.addEventListener("devicemotion", onMotion);
+  };
+  window.askMotion = askMotion;
+  const step = (t) => {
+    const dt = Math.min(0.033, (t - (last || t)) / 1000); last = t;
+    const W = window.innerWidth, H = window.innerHeight;
+    const target = -Math.atan2(grav.x, grav.y) * 180 / Math.PI;   // "feet toward gravity"
+    for (const b of bears) {
+      if (b.wait > 0) { b.wait -= dt; continue; }
+      b.vx += grav.x * dt; b.vy += grav.y * dt;
+      b.vx *= 0.998; b.vy *= 0.998;
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      if (b.y - b.r > 0) b.inside = true;
+      let hit = false;
+      const bounce = (v) => { b.sq = Math.min(1, Math.abs(v) / 1400); b.av = (Math.random() - 0.5) * 2 * Math.min(200, Math.abs(v) * 0.25); };
+      if (b.y + b.r > H) { b.y = H - b.r; if (b.vy > 90) { bounce(b.vy); b.vy = -b.vy * b.e; } else if (b.vy > 0) b.vy = 0; b.vx *= 0.97; hit = true; }
+      if (b.inside && b.y - b.r < 0) { b.y = b.r; if (b.vy < -90) { bounce(b.vy); b.vy = -b.vy * b.e; } else if (b.vy < 0) b.vy = 0; b.vx *= 0.97; hit = true; }
+      if (b.x - b.r < 0) { b.x = b.r; if (b.vx < -90) { bounce(b.vx); b.vx = -b.vx * b.e; } else if (b.vx < 0) b.vx = 0; b.vy *= 0.97; hit = true; }
+      if (b.x + b.r > W) { b.x = W - b.r; if (b.vx > 90) { bounce(b.vx); b.vx = -b.vx * b.e; } else if (b.vx > 0) b.vx = 0; b.vy *= 0.97; hit = true; }
+      b.sq = Math.max(0, b.sq - dt * 5);
+      // spin while in the air; turn feet-toward-gravity when resting against a wall
+      if (hit) { b.av *= 0.6; const tgt = target + Math.round((b.spin - target) / 360) * 360; b.spin += (tgt - b.spin) * Math.min(1, dt * 7); }
+      else b.spin += b.av * dt;
+    }
+    for (let pass = 0; pass < 2; pass++)
+    for (let i = 0; i < bears.length; i++) for (let j = i + 1; j < bears.length; j++) {
+      const A = bears[i], B = bears[j]; if (A.wait > 0 || B.wait > 0) continue;
+      const dx = B.x - A.x, dy = B.y - A.y, d = Math.hypot(dx, dy), m = (A.r + B.r) * 0.9;
+      if (d > 0 && d < m) {
+        const nx = dx / d, ny = dy / d, push = (m - d) / 2;
+        A.x -= nx * push; A.y -= ny * push; B.x += nx * push; B.y += ny * push;
+        const rv = (B.vx - A.vx) * nx + (B.vy - A.vy) * ny;
+        if (rv < 0) { const imp = -rv * 0.85; A.vx -= imp * nx; A.vy -= imp * ny; B.vx += imp * nx; B.vy += imp * ny; }
+      }
+    }
+    const now = performance.now();
+    const life = motionOn ? 30 : 7.3;                // stay longer when the phone can play with them
+    for (let i = bears.length - 1; i >= 0; i--) {
+      const b = bears[i];
+      const tilt = b.spin + Math.max(-25, Math.min(25, b.vx * 0.08)) + Math.sin(now / 260 + b.ph) * 4;
+      const sx = 1 + 0.18 * b.sq, sy = 1 - 0.18 * b.sq;
+      b.img.style.transform = `translate3d(${(b.x - b.r).toFixed(1)}px,${(b.y - b.r).toFixed(1)}px,0) rotate(${tilt.toFixed(1)}deg) scale(${sx.toFixed(3)},${sy.toFixed(3)})`;
+      const age = (now - b.born) / 1000;
+      b.img.style.opacity = age > life - 0.8 ? Math.max(0, (life - age) / 0.8) : 1;
+      if (age > life) { b.img.remove(); bears.splice(i, 1); }
+    }
+    if (bears.length) raf = requestAnimationFrame(step); else { raf = 0; last = 0; }
+  };
+
   const drop = () => {
     if (busy) return; busy = true;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const W = window.innerWidth, H = window.innerHeight, FS = 14, cols = Math.ceil(W / FS);
-    const cv = document.createElement("canvas"); cv.id = "matrix";
-    cv.width = W * dpr; cv.height = H * dpr; document.body.append(cv);
-    const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr);
-    const off = document.createElement("canvas"); off.width = cv.width; off.height = cv.height;
-    const o = off.getContext("2d"); o.scale(dpr, dpr);
-    o.fillStyle = "#021A0A"; o.fillRect(0, 0, W, H);
-    o.font = `${FS}px Menlo, "Courier New", monospace`; o.textBaseline = "top";
-    const ys = Array.from({length: cols}, () => Math.random() * H * 0.9 - H * 0.3);
-    const sp = Array.from({length: cols}, () => 0.55 + Math.random() * 0.9);
-    const IN = 2200, HOLD = 1600, OUT = 2200, END = IN + HOLD + OUT;
-    let start = 0, prev = 0;
-    const frame = (t) => {
-      if (!start) { start = prev = t; }
-      const el2 = t - start, dt = Math.min(50, t - prev); prev = t;
-      // rain on the off-screen layer (trails fade toward dark green)
-      o.fillStyle = "rgba(2,26,10,0.075)"; o.fillRect(0, 0, W, H);
-      for (let c = 0; c < cols; c++) {
-        const ch = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
-        o.fillStyle = Math.random() < 0.08 ? "#E8FFE8" : "#00FF41";
-        o.fillText(ch, c * FS, ys[c]);
-        ys[c] += FS * sp[c] * dt / 32;
-        if (ys[c] > H && Math.random() > 0.96) ys[c] = -Math.random() * 200;
-      }
-      // soft fronts: the green fades in from the top down, then fades out from the top down
-      const band = H * 0.45;
-      const f1 = ease(el2 / IN) * (H + band * 2) - band;
-      const f2 = ease((el2 - IN - HOLD) / OUT) * (H + band * 2) - band;
-      ctx.globalCompositeOperation = "source-over";
-      ctx.clearRect(0, 0, W, H);
-      ctx.drawImage(off, 0, 0, W, H);
-      ctx.globalCompositeOperation = "destination-in";
-      const g1 = ctx.createLinearGradient(0, f1 - band, 0, f1 + band);
-      g1.addColorStop(0, "rgba(0,0,0,1)"); g1.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
-      if (el2 > IN + HOLD) {
-        const g2 = ctx.createLinearGradient(0, f2 - band, 0, f2 + band);
-        g2.addColorStop(0, "rgba(0,0,0,0)"); g2.addColorStop(1, "rgba(0,0,0,1)");
-        ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H);
-      }
-      ctx.globalCompositeOperation = "source-over";
-      if (el2 < END) requestAnimationFrame(frame);
-      else { cv.remove(); busy = false; }
-    };
-    requestAnimationFrame(frame);
+    while (bears.length > 24) { bears[0].img.remove(); bears.shift(); }   // keep it light
+    const W = window.innerWidth, n = W < 600 ? 9 : 14, now = performance.now();
+    for (let i = 0; i < n; i++) {
+      const size = 44 + Math.random() * 30, r = size / 2;
+      const img = document.createElement("img");
+      img.className = "bear"; img.src = BEAR; img.alt = ""; img.width = size; img.height = size;
+      img.style.transform = "translate3d(-200px,-200px,0)";
+      box.append(img);
+      const wait = Math.random() * 1.0;
+      bears.push({ img, r, x: r + Math.random() * (W - size), y: -r - Math.random() * 120,
+        vx: (Math.random() - 0.5) * 240, vy: 0, e: 0.6 + Math.random() * 0.18,
+        sq: 0, ph: Math.random() * 6, spin: (Math.random() - 0.5) * 120, av: (Math.random() < 0.5 ? -1 : 1) * (90 + Math.random() * 180), wait, born: now + wait * 1000 });
+    }
+    if (!raf) raf = requestAnimationFrame(step);
+    setTimeout(() => { busy = false; }, 1500);
   };
 
   let startY = null, pulled = 0;
@@ -357,7 +392,7 @@ $("foot").textContent = `McGill Expenses ${VERSION} · ${DATA_AS_OF}`;
     hint.style.opacity = p; hint.style.transform = `translate(-50%, ${-50 + p * 60}px) rotate(${p * 180}deg)`;
   }, {passive: true});
   window.addEventListener("touchend", () => {
-    if (startY != null && pulled > 90) drop();
+    if (startY != null && pulled > 90) { askMotion(); drop(); }
     startY = null; pulled = 0; hint.style.opacity = 0; hint.style.transform = "translate(-50%,-50px)";
   }, {passive: true});
   // On a computer: scroll up hard while already at the top
@@ -367,7 +402,7 @@ $("foot").textContent = `McGill Expenses ${VERSION} · ${DATA_AS_OF}`;
     wheelUp += -e.deltaY; clearTimeout(wt); wt = setTimeout(() => { wheelUp = 0; }, 300);
     if (wheelUp > 400) { wheelUp = 0; drop(); }
   }, {passive: true});
-  window.matrixWave = drop;
+  window.dropBears = drop;
 })();
 </script>
 </body>
