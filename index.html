@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#F2F2F7">
 <meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Cache-Control" content="no-cache">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
@@ -78,9 +79,15 @@ details ul{padding-left:1.2em;margin:6px 0 0}
   td{padding:9px 7px}
 }
 
+/* Pull down to update */
+#ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 8px);width:36px;height:36px;margin-left:-18px;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;color:var(--red);transform:translateY(-60px);opacity:0;z-index:50;pointer-events:none}
+#ptr.go{transition:transform .25s,opacity .25s}
+#ptr.spin svg{animation:ptrspin .8s linear infinite}
+@keyframes ptrspin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+<div id="ptr"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></div>
 <div class="wrap">
   <div class="titlebar">
     <img src="icon-180.png" alt="McGill">
@@ -143,7 +150,7 @@ details ul{padding-left:1.2em;margin:6px 0 0}
 </div>
 
 <script>
-const VERSION = "v4.0";
+const VERSION = "v4.1";
 const DATA_AS_OF = "2026-11-15";
 
 // Transactions: [date, item, note, essentials, other]  — money in is +, money out is −
@@ -285,6 +292,32 @@ if (months.length) show(months[months.length - 1], cols[cols.length - 1]);
 $("foot").textContent = `McGill Expenses ${VERSION} · ${DATA_AS_OF}`;
 
 
+
+// Pull down at the top of the page to update (reloads the newest version from GitHub)
+(() => {
+  const ptr = $("ptr"), svg = ptr.querySelector("svg"), PULL = 80;
+  let startY = null, d = 0, busy = false;
+  window.addEventListener("touchstart", (e) => {
+    if (busy) return;
+    startY = window.scrollY <= 0 ? e.touches[0].clientY : null; d = 0; ptr.classList.remove("go");
+  }, {passive: true});
+  window.addEventListener("touchmove", (e) => {
+    if (startY == null) return;
+    d = Math.max(0, e.touches[0].clientY - startY);
+    const p = Math.min(1, d / PULL);
+    ptr.style.opacity = p;
+    ptr.style.transform = `translateY(${-60 + p * 80}px)`;
+    svg.style.transform = `rotate(${p * 300}deg)`;
+  }, {passive: true});
+  window.addEventListener("touchend", () => {
+    if (startY == null) return;
+    startY = null; ptr.classList.add("go");
+    if (d >= PULL) {
+      busy = true; ptr.classList.add("spin"); ptr.style.opacity = 1; ptr.style.transform = "translateY(20px)";
+      setTimeout(() => location.replace(location.pathname + "?v=" + Date.now()), 450);
+    } else { ptr.style.opacity = 0; ptr.style.transform = "translateY(-60px)"; }
+  }, {passive: true});
+})();
 </script>
 </body>
 </html>
