@@ -79,9 +79,18 @@ details ul{padding-left:1.2em;margin:6px 0 0}
   td{padding:9px 7px}
 }
 
+/* Pull down to update — iOS-style gray spinner */
+#ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 10px);display:flex;align-items:center;gap:8px;padding:8px 14px 8px 10px;border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.14);margin-left:0;transform:translate(-50%,-70px);opacity:0;z-index:50;pointer-events:none;white-space:nowrap}
+#ptr.go{transition:transform .25s,opacity .25s}
+.spn{position:relative;width:22px;height:22px;flex:none}
+.spn i{position:absolute;left:10px;top:1px;width:2.2px;height:6px;border-radius:2px;background:#8E8E93;transform-origin:1.1px 10px}
+#ptr.spin .spn{animation:spnrot 1s steps(12) infinite}
+@keyframes spnrot{to{transform:rotate(360deg)}}
+.ptrtxt{font-size:13px;font-weight:500;color:#3A3A3C}
 </style>
 </head>
 <body>
+<div id="ptr"><div class="spn"><i style="transform:rotate(0deg);opacity:0.25"></i><i style="transform:rotate(30deg);opacity:0.32"></i><i style="transform:rotate(60deg);opacity:0.39"></i><i style="transform:rotate(90deg);opacity:0.45"></i><i style="transform:rotate(120deg);opacity:0.52"></i><i style="transform:rotate(150deg);opacity:0.59"></i><i style="transform:rotate(180deg);opacity:0.66"></i><i style="transform:rotate(210deg);opacity:0.73"></i><i style="transform:rotate(240deg);opacity:0.80"></i><i style="transform:rotate(270deg);opacity:0.86"></i><i style="transform:rotate(300deg);opacity:0.93"></i><i style="transform:rotate(330deg);opacity:1.00"></i></div><div class="ptrtxt"></div></div>
 <div class="wrap">
   <div class="titlebar">
     <img src="icon-180.png" alt="McGill">
@@ -144,7 +153,7 @@ details ul{padding-left:1.2em;margin:6px 0 0}
 </div>
 
 <script>
-const VERSION = "v4.2";
+const VERSION = "v4.3";
 const DATA_AS_OF = "2026-11-15";
 
 // Transactions: [date, item, note, essentials, other]  — money in is +, money out is −
@@ -289,12 +298,30 @@ $("foot").textContent = `McGill Expenses ${VERSION} · ${DATA_AS_OF}`;
 
 // Pull down at the top of the page to update (reloads the newest version from GitHub)
 (() => {
-  const PULL = 80; let startY = null, d = 0, busy = false;
-  window.addEventListener("touchstart", (e) => { if (!busy) { startY = window.scrollY <= 0 ? e.touches[0].clientY : null; d = 0; } }, {passive: true});
-  window.addEventListener("touchmove", (e) => { if (startY != null) d = e.touches[0].clientY - startY; }, {passive: true});
+  const ptr = $("ptr"), spn = ptr.querySelector(".spn"), txt = ptr.querySelector(".ptrtxt"), bars = spn.querySelectorAll("i"), PULL = 80;
+  let startY = null, d = 0, busy = false;
+  const show = (p) => {
+    ptr.style.opacity = Math.min(1, p * 1.4);
+    ptr.style.transform = `translate(-50%, ${-70 + Math.min(1, p) * 80}px)`;
+    const n = Math.round(Math.min(1, p) * 12);            // bars appear one by one as you pull
+    bars.forEach((b, i) => { b.style.visibility = i < n ? "visible" : "hidden"; });
+    txt.textContent = p >= 1 ? "Release to update" : "Pull to update";
+  };
+  window.addEventListener("touchstart", (e) => {
+    if (busy) return; ptr.classList.remove("go");
+    startY = window.scrollY <= 0 ? e.touches[0].clientY : null; d = 0;
+  }, {passive: true});
+  window.addEventListener("touchmove", (e) => {
+    if (startY == null) return;
+    d = Math.max(0, e.touches[0].clientY - startY); show(d / PULL);
+  }, {passive: true});
   window.addEventListener("touchend", () => {
-    if (startY != null && d >= PULL) { busy = true; location.replace(location.pathname + "?v=" + Date.now()); }
-    startY = null; d = 0;
+    if (startY == null) return;
+    startY = null; ptr.classList.add("go");
+    if (d >= PULL) {
+      busy = true; show(1); txt.textContent = "Updating…"; ptr.classList.add("spin");
+      setTimeout(() => location.replace(location.pathname + "?v=" + Date.now()), 700);
+    } else { ptr.style.opacity = 0; ptr.style.transform = "translate(-50%,-70px)"; }
   }, {passive: true});
 })();
 </script>
